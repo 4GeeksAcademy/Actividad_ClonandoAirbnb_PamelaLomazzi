@@ -1,0 +1,195 @@
+export type CategoryKey =
+  | "playa"
+  | "piscinas"
+  | "centro"
+  | "lujo"
+  | "romantico"
+  | "vistas";
+
+export type FilterValue = CategoryKey | "all";
+export type SectionKey = "buenos-aires" | "madrid";
+
+export interface Listing {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  currency: string;
+  rating: number;
+  image: string;
+  badge?: string;
+  category: CategoryKey;
+  section: SectionKey;
+}
+
+export interface FilterItem {
+  id: FilterValue;
+  label: string;
+  icon: string;
+}
+
+export interface ListingSectionData {
+  id: SectionKey;
+  title: string;
+  subtitle?: string;
+}
+
+export const filterItems: FilterItem[] = [
+  { id: "all", label: "Explorar", icon: "ALL" },
+  { id: "centro", label: "Centro", icon: "CTR" },
+  { id: "vistas", label: "Vistas", icon: "SKY" },
+  { id: "piscinas", label: "Piscinas", icon: "POOL" },
+  { id: "lujo", label: "Lujo", icon: "LUX" },
+  { id: "romantico", label: "Romantico", icon: "LOVE" },
+  { id: "playa", label: "Escapadas", icon: "SUN" },
+];
+
+export const sections: ListingSectionData[] = [
+  { id: "buenos-aires", title: "Alojamientos populares en Buenos Aires" },
+  {
+    id: "madrid",
+    title: "Hoteles destacados en Madrid",
+    subtitle: "Una coleccion de hoteles independientes cuidadosamente seleccionados",
+  },
+];
+
+export const mockListings: Listing[] = [
+  {
+    id: "ba-1",
+    title: "Apartamento en Buenos Aires",
+    location: "Palermo Soho",
+    price: 5211,
+    currency: "UYU",
+    rating: 5,
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+    badge: "Favorito entre huespedes",
+    category: "centro",
+    section: "buenos-aires",
+  },
+  {
+    id: "ba-2",
+    title: "Loft con balcon",
+    location: "Recoleta",
+    price: 4961,
+    currency: "UYU",
+    rating: 4.86,
+    image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=900&q=80",
+    badge: "Favorito entre huespedes",
+    category: "lujo",
+    section: "buenos-aires",
+  },
+  {
+    id: "ba-3",
+    title: "Estudio moderno",
+    location: "Puerto Madero",
+    price: 4680,
+    currency: "UYU",
+    rating: 4.96,
+    image: "https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=900&q=80",
+    badge: "Favorito entre huespedes",
+    category: "vistas",
+    section: "buenos-aires",
+  },
+  {
+    id: "ba-4",
+    title: "Apartamento en BYM",
+    location: "Belgrano",
+    price: 4409,
+    currency: "UYU",
+    rating: 4.96,
+    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80",
+    badge: "Favorito entre huespedes",
+    category: "romantico",
+    section: "buenos-aires",
+  },
+  {
+    id: "ba-5",
+    title: "Habitacion en Palermo",
+    location: "Buenos Aires",
+    price: 2340,
+    currency: "UYU",
+    rating: 4.92,
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+    category: "centro",
+    section: "buenos-aires",
+  },
+  {
+    id: "ba-6",
+    title: "Penthouse con jacuzzi",
+    location: "Microcentro",
+    price: 4165,
+    currency: "UYU",
+    rating: 4.83,
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80",
+    category: "vistas",
+    section: "buenos-aires",
+  },
+  {
+    id: "md-1",
+    title: "NH Madrid Chamberi",
+    location: "Madrid",
+    price: 14867,
+    currency: "UYU",
+    rating: 4.88,
+    image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=900&q=80",
+    category: "centro",
+    section: "madrid",
+  },
+  {
+    id: "md-2",
+    title: "chic&basic dot",
+    location: "Gran Via",
+    price: 20856,
+    currency: "UYU",
+    rating: 4.72,
+    image: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&w=900&q=80",
+    badge: "Favorito entre huespedes",
+    category: "romantico",
+    section: "madrid",
+  },
+  {
+    id: "md-3",
+    title: "Sercotel de los Reyes",
+    location: "Madrid Centro",
+    price: 9172,
+    currency: "UYU",
+    rating: 4.75,
+    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=900&q=80",
+    category: "lujo",
+    section: "madrid",
+  },
+  {
+    id: "md-4",
+    title: "Amber Plaza Espana Skyline",
+    location: "Plaza Espana",
+    price: 23033,
+    currency: "UYU",
+    rating: 4.81,
+    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80",
+    badge: "Favorito entre huespedes",
+    category: "vistas",
+    section: "madrid",
+  },
+  {
+    id: "md-5",
+    title: "The Loft House Madrid",
+    location: "Malasana",
+    price: 23121,
+    currency: "UYU",
+    rating: 4.79,
+    image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+    category: "lujo",
+    section: "madrid",
+  },
+  {
+    id: "md-6",
+    title: "Zenit Conde Orgaz",
+    location: "Madrid Norte",
+    price: 18762,
+    currency: "UYU",
+    rating: 4.69,
+    image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=900&q=80",
+    category: "piscinas",
+    section: "madrid",
+  },
+];
