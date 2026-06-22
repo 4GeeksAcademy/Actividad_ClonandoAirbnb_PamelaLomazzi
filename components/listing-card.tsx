@@ -1,6 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
-import { type Listing } from "@/components/home-data";
+import { type Listing } from "@/types/listing";
 
 interface ListingCardProps {
   listing: Listing;
@@ -38,7 +39,11 @@ export const ListingCard = ({ listing }: ListingCardProps) => {
       </div>
       <div className="space-y-1 text-sm">
         <div className="flex items-start justify-between gap-3">
-          <h3 className="font-semibold text-zinc-900">{listing.title}</h3>
+          <h3 className="font-semibold text-zinc-900">
+            <Link href={`/rooms/${listing.id}`} className="hover:underline">
+              {listing.title}
+            </Link>
+          </h3>
           <span className="shrink-0 text-zinc-600">{listing.rating.toFixed(2)}</span>
         </div>
         <p className="text-zinc-500">{listing.location}</p>

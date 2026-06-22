@@ -1,4 +1,4 @@
-import { type Listing } from "@/components/home-data";
+import { type Listing } from "@/types/listing";
 import { ListingsGrid } from "@/components/listings-grid";
 
 interface ListingSectionProps {

@@ -1,6 +1,7 @@
-import { type Listing } from "@/components/home-data";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ListingCard } from "@/components/listing-card";
 import { ListingCardSkeleton } from "@/components/listing-card-skeleton";
+import { type Listing } from "@/types/listing";
 
 interface ListingsGridProps {
   listings: Listing[];
@@ -19,11 +20,7 @@ export const ListingsGrid = ({ listings, loading }: ListingsGridProps) => {
   }
 
   if (!listings.length) {
-    return (
-      <div className="rounded-[2rem] border border-dashed border-zinc-300 bg-white px-6 py-10 text-center text-sm text-zinc-500">
-        No hay alojamientos que coincidan con la busqueda y los filtros activos.
-      </div>
-    );
+    return <EmptyState message="No hay alojamientos que coincidan con la busqueda y los filtros activos." />;
   }
 
   return (

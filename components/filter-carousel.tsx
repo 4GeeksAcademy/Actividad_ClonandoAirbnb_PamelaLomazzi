@@ -1,4 +1,4 @@
-import { type FilterItem, type FilterValue } from "@/components/home-data";
+import { type FilterItem, type FilterValue } from "@/types/listing";
 
 interface FilterCarouselProps {
   items: FilterItem[];

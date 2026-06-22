@@ -1,4 +1,4 @@
-export type PriceSortOrder = "asc" | "desc";
+import { type PriceSortOrder } from "@/types/catalog";
 
 interface CatalogResultsHeaderProps {
   resultsCount: number;

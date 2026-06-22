@@ -852,3 +852,448 @@ Para cumplir el límite:
 - El mapa por defecto es un recuadro gris con la palabra "Mapa".
 - Todos los componentes son funcionales con `const`.
 - Ningún componente supera aproximadamente 80 líneas.
+
+# Especificación Técnica Detalle de Habitación Airbnb Clone
+
+## Objetivo
+
+Construir la vista de detalle de habitación en la ruta [app/rooms/[id]/page.tsx](app/rooms/[id]/page.tsx) con enfoque Mobile-First (375px) y adaptación a escritorio desde 768px.
+
+La pantalla debe incluir:
+
+1. Navegación de retorno a catálogo con `<Link>`.
+2. Carga dinámica de datos según el `id` de la URL.
+3. Galería de fotos con carrusel e índice activo.
+4. Secciones internas de información (cabecera, anfitrión, servicios).
+5. Tarjeta de reserva con contador interactivo de huéspedes.
+
+## Estructura de Archivos Propuesta
+
+### Páginas en /app
+
+- [app/rooms/[id]/page.tsx](app/rooms/[id]/page.tsx): orquesta estado de carga, selección de habitación y estructura general.
+
+### Componentes reutilizables en /components
+
+- [components/navbar.tsx](components/navbar.tsx): cabecera superior global reutilizable.
+- [components/room-photo-carousel.tsx](components/room-photo-carousel.tsx): carrusel con navegación anterior/siguiente.
+- [components/room-header.tsx](components/room-header.tsx): título, valoración y ubicación.
+- [components/host-row.tsx](components/host-row.tsx): fila del anfitrión con avatar y metadatos.
+- [components/services-grid.tsx](components/services-grid.tsx): servicios en grid icono + etiqueta.
+- [components/reservation-card.tsx](components/reservation-card.tsx): precio + contador de huéspedes + CTA.
+- [components/room-detail-skeleton.tsx](components/room-detail-skeleton.tsx): estado de carga visual.
+
+## Tipos de Dominio
+
+Se recomienda extender los tipos existentes con un contrato específico para detalle.
+
+```ts
+export interface HostInfo {
+	name: string;
+	yearsHosting: number;
+	avatar: string;
+}
+
+export interface ServiceItem {
+	id: string;
+	label: string;
+	icon: string;
+}
+
+export interface RoomDetail {
+	id: string;
+	title: string;
+	location: string;
+	rating: number;
+	reviewsCount: number;
+	pricePerNight: number;
+	currency: string;
+	maxGuests: number;
+	photos: string[];
+	host: HostInfo;
+	services: ServiceItem[];
+	bedrooms: number;
+	beds: number;
+	bathrooms: number;
+}
+```
+
+## Jerarquía de Componentes
+
+```text
+app/rooms/[id]/page.tsx
+	RoomDetailPage
+		Navbar
+		Link (volver a /catalog)
+		RoomHeader
+		RoomPhotoCarousel
+		MainContent
+			InfoColumn
+				HostRow
+				ServicesGrid
+			ReservationCard
+```
+
+## Componente: RoomDetailPage
+
+**Ubicación**
+
+- [app/rooms/[id]/page.tsx](app/rooms/[id]/page.tsx)
+
+**Responsabilidad**
+
+Capturar `id` dinámico de la URL, simular carga, resolver el detalle de habitación y componer la pantalla.
+
+**Props**
+
+No recibe props directas (Client Component). Consume App Router con hooks.
+
+**Estado local**
+
+```ts
+const [loading, setLoading] = useState(true);
+const [room, setRoom] = useState<RoomDetail | null>(null);
+const [searchTerm, setSearchTerm] = useState("");
+```
+
+**Captura del id dinámico (App Router)**
+
+```ts
+const params = useParams<{ id: string }>();
+const roomId = params.id;
+```
+
+**Carga de datos obligatoria con useEffect + setTimeout**
+
+```ts
+useEffect(() => {
+	setLoading(true);
+
+	const timer = setTimeout(() => {
+		const foundRoom = mockRooms.find((item) => item.id === roomId) ?? null;
+		setRoom(foundRoom);
+		setLoading(false);
+	}, 1000);
+
+	return () => clearTimeout(timer);
+}, [roomId]);
+```
+
+**Reglas de render**
+
+```ts
+if (loading) return <RoomDetailSkeleton />;
+if (!room) return <NotFoundState />;
+return <DetailLayout room={room} />;
+```
+
+**Layout Tailwind**
+
+- Wrapper principal: `min-h-screen bg-[#fbfbfb] text-zinc-900`
+- Contenedor: `mx-auto w-full max-w-7xl px-4 py-4 md:px-8 md:py-6`
+- Estructura móvil: `flex flex-col gap-6`
+- Estructura escritorio para columnas: `md:grid md:grid-cols-[minmax(0,1fr)_360px] md:items-start md:gap-8`
+
+**Notas de implementación**
+
+- Debe iniciar con `"use client"` por uso de `useState`, `useEffect` y `useParams`.
+- El botón/breadcrumb de retorno debe usar obligatoriamente `<Link href="/catalog">`.
+
+## Componente: RoomPhotoCarousel
+
+**Ubicación**
+
+- [components/room-photo-carousel.tsx](components/room-photo-carousel.tsx)
+
+**Responsabilidad**
+
+Mostrar fotos de la habitación con navegación anterior/siguiente y control del índice activo.
+
+**Props y tipado**
+
+```ts
+interface RoomPhotoCarouselProps {
+	photos: string[];
+	title: string;
+}
+```
+
+**Estado local obligatorio**
+
+```ts
+const [activePhotoIndex, setActivePhotoIndex] = useState(0);
+```
+
+**Efectos**
+
+- No requiere `useEffect` para navegación básica.
+
+**Navegación obligatoria por botones**
+
+```ts
+const goNext = () => {
+	setActivePhotoIndex((current) => (current + 1) % photos.length);
+};
+
+const goPrev = () => {
+	setActivePhotoIndex((current) =>
+		(current - 1 + photos.length) % photos.length
+	);
+};
+```
+
+**Layout Tailwind**
+
+- Wrapper: `relative overflow-hidden rounded-[2rem] bg-zinc-100`
+- Imagen: `aspect-[4/3] w-full object-cover md:aspect-[16/9]`
+- Controles: `absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-between px-3`
+- Indicador: `absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/45 px-3 py-1 text-xs text-white`
+
+## Componente: RoomHeader
+
+**Ubicación**
+
+- [components/room-header.tsx](components/room-header.tsx)
+
+**Responsabilidad**
+
+Renderizar título principal, rating, cantidad de reseñas y ubicación.
+
+**Props y tipado**
+
+```ts
+interface RoomHeaderProps {
+	title: string;
+	rating: number;
+	reviewsCount: number;
+	location: string;
+	guests: number;
+	bedrooms: number;
+	beds: number;
+	bathrooms: number;
+}
+```
+
+**Estado local**
+
+- No necesita estado propio.
+
+**Efectos**
+
+- No usa `useEffect`.
+
+**Layout Tailwind**
+
+- Wrapper: `space-y-2`
+- Título: `text-3xl font-semibold tracking-tight`
+- Metadata: `text-sm text-zinc-600`
+- Fila rating/location: `flex flex-wrap items-center gap-2 text-sm font-medium`
+
+## Componente: HostRow
+
+**Ubicación**
+
+- [components/host-row.tsx](components/host-row.tsx)
+
+**Responsabilidad**
+
+Mostrar información del anfitrión: avatar, nombre y años hospedando.
+
+**Props y tipado**
+
+```ts
+interface HostRowProps {
+	host: HostInfo;
+}
+```
+
+**Estado local**
+
+- No usa estado.
+
+**Efectos**
+
+- No usa `useEffect`.
+
+**Layout Tailwind**
+
+- Wrapper: `flex items-center gap-4 rounded-2xl border border-zinc-200 bg-white p-4`
+- Avatar: `h-14 w-14 rounded-full object-cover`
+- Texto secundario: `text-sm text-zinc-500`
+
+## Componente: ServicesGrid
+
+**Ubicación**
+
+- [components/services-grid.tsx](components/services-grid.tsx)
+
+**Responsabilidad**
+
+Mostrar la lista de servicios en formato grid de icono + etiqueta.
+
+**Props y tipado**
+
+```ts
+interface ServicesGridProps {
+	services: ServiceItem[];
+}
+```
+
+**Estado local**
+
+- No necesita estado.
+
+**Efectos**
+
+- No requiere `useEffect`.
+
+**Layout Tailwind**
+
+- Wrapper: `grid grid-cols-1 gap-3 sm:grid-cols-2`
+- Item: `flex items-center gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3`
+- Icono: `text-zinc-700`
+
+## Componente: ReservationCard
+
+**Ubicación**
+
+- [components/reservation-card.tsx](components/reservation-card.tsx)
+
+**Responsabilidad**
+
+Mostrar precio por noche, contador interactivo de huéspedes con rango válido y botón de reserva.
+
+**Props y tipado**
+
+```ts
+interface ReservationCardProps {
+	pricePerNight: number;
+	currency: string;
+	maxGuests: number;
+}
+```
+
+**Estado local obligatorio**
+
+```ts
+const [guests, setGuests] = useState(1);
+```
+
+**Reglas de rango mínimo/máximo**
+
+```ts
+const decreaseGuests = () => setGuests((value) => Math.max(1, value - 1));
+const increaseGuests = () => setGuests((value) => Math.min(maxGuests, value + 1));
+```
+
+**Efectos**
+
+- No requiere `useEffect` para el contador.
+
+**CTA**
+
+- Botón principal con texto tipo "Reservar" o "Reservar ahora".
+- Puede incluir callback opcional `onReserve` en una versión posterior.
+
+**Layout Tailwind**
+
+- Wrapper: `rounded-[2rem] border border-zinc-200 bg-white p-5 shadow-sm`
+- Precio: `text-3xl font-semibold tracking-tight`
+- Control huéspedes: `flex items-center justify-between rounded-xl border border-zinc-200 px-3 py-2`
+- Botones +/-: `h-9 w-9 rounded-full border border-zinc-300 disabled:opacity-40`
+- CTA: `mt-4 w-full rounded-xl bg-zinc-900 px-4 py-3 text-white`
+- Posición escritorio: `md:sticky md:top-28`
+
+## Componente: BackToCatalog
+
+**Ubicación**
+
+- Puede ser inline en [app/rooms/[id]/page.tsx](app/rooms/[id]/page.tsx) o extraerse a [components/back-to-catalog.tsx](components/back-to-catalog.tsx).
+
+**Responsabilidad**
+
+Permitir volver a catálogo usando obligatoriamente `<Link>` de Next.js.
+
+**Props y tipado**
+
+```ts
+interface BackToCatalogProps {
+	label?: string;
+}
+```
+
+**Implementación obligatoria**
+
+```tsx
+<Link href="/catalog" className="inline-flex items-center gap-2 text-sm font-medium">
+	<span aria-hidden="true">←</span>
+	Volver a catalogo
+</Link>
+```
+
+No se debe usar `window.history.back()` como mecanismo principal.
+
+## Estado de Carga y Vacío
+
+### RoomDetailSkeleton
+
+- Usar placeholders `animate-pulse` para cabecera, imagen y tarjeta de reserva.
+- Mantener layout final para evitar saltos visuales.
+
+### NotFoundState
+
+- Si no existe `room` para el `id`, mostrar mensaje y enlace a [app/catalog/page.tsx](app/catalog/page.tsx).
+
+## Flujo de Datos Recomendado
+
+1. `RoomDetailPage` lee `id` con `useParams`.
+2. `useEffect` simula fetch con `setTimeout(1000)`.
+3. Al terminar carga, setea `room` y `loading`.
+4. `RoomPhotoCarousel` maneja índice activo de imagen.
+5. `ReservationCard` maneja contador de huéspedes dentro del rango válido.
+6. `<Link href="/catalog">` resuelve la navegación de retorno.
+
+## Estrategia Mobile-First
+
+### Base móvil 375px
+
+- Stack vertical único: retorno, cabecera, galería, anfitrión, servicios, tarjeta de reserva.
+- Carrusel ocupa ancho completo.
+- Tarjeta de reserva se ubica al final del flujo.
+
+### Adaptación desde 768px
+
+- Estructura en dos columnas para información y reserva.
+- Tarjeta de reserva pasa a lateral derecho con `sticky`.
+- Galería mantiene prioridad visual en la parte superior.
+
+## Restricción de ~80 líneas por componente
+
+Para cumplir el límite:
+
+- Dejar el `useEffect` de carga únicamente en [app/rooms/[id]/page.tsx](app/rooms/[id]/page.tsx).
+- Mantener [components/room-photo-carousel.tsx](components/room-photo-carousel.tsx) enfocado solo en navegación de fotos.
+- Mantener [components/reservation-card.tsx](components/reservation-card.tsx) enfocado solo en precio + huéspedes + CTA.
+- Evitar lógica de negocio en [components/room-header.tsx](components/room-header.tsx), [components/host-row.tsx](components/host-row.tsx) y [components/services-grid.tsx](components/services-grid.tsx).
+
+## Orden de Implementación Recomendado
+
+1. Crear ruta [app/rooms/[id]/page.tsx](app/rooms/[id]/page.tsx) como Client Component.
+2. Implementar `useParams` + `useEffect` + `setTimeout` para carga.
+3. Agregar botón de retorno con `<Link href="/catalog">`.
+4. Implementar [components/room-photo-carousel.tsx](components/room-photo-carousel.tsx) con índice activo.
+5. Implementar secciones [components/room-header.tsx](components/room-header.tsx), [components/host-row.tsx](components/host-row.tsx), [components/services-grid.tsx](components/services-grid.tsx).
+6. Implementar [components/reservation-card.tsx](components/reservation-card.tsx) con contador de huéspedes.
+7. Añadir skeleton y estado no encontrado.
+
+## Criterios de Aceptación
+
+- Se captura dinámicamente `id` de la URL con App Router.
+- La carga de detalle usa `useEffect` + `setTimeout` y muestra estado de carga.
+- El carrusel gestiona `activePhotoIndex` con `useState` y botones Anterior/Siguiente.
+- La vista incluye cabecera, fila del anfitrión y servicios en grid.
+- La tarjeta de reserva incluye precio por noche, contador de huéspedes con rango válido y CTA.
+- Existe navegación de retorno a catálogo usando obligatoriamente `<Link href="/catalog">`.
+- El diseño es Mobile-First y se adapta correctamente desde `md`.
+- Todos los componentes son funcionales con `const`.
+- Ningún componente supera aproximadamente 80 líneas.

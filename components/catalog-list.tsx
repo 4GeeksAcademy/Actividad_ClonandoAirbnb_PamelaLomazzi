@@ -1,5 +1,6 @@
-import { type Listing } from "@/components/home-data";
 import { ListingCard } from "@/components/listing-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { type Listing } from "@/types/listing";
 
 interface CatalogListProps {
   listings: Listing[];
@@ -7,11 +8,7 @@ interface CatalogListProps {
 
 export const CatalogList = ({ listings }: CatalogListProps) => {
   if (!listings.length) {
-    return (
-      <div className="rounded-[2rem] border border-dashed border-zinc-300 bg-white px-6 py-10 text-center text-sm text-zinc-500">
-        No hay alojamientos que coincidan con la busqueda actual.
-      </div>
-    );
+    return <EmptyState message="No hay alojamientos que coincidan con la busqueda actual." />;
   }
 
   return (
